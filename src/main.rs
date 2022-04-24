@@ -16,6 +16,12 @@ fn main() -> Result<()> {
         cli::Commands::View => {
             entry::view_daily_log();
         }
+        cli::Commands::Total => {
+            println!(
+                "Today's caloric total: {}",
+                entry::total_calories_for_daily_log()
+            )
+        }
     }
 
     Ok(())

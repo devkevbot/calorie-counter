@@ -25,4 +25,6 @@ pub enum Commands {
     },
     /// View the contents of the daily log
     View,
+    /// Print the total calories recorded in the daily log
+    Total,
 }
