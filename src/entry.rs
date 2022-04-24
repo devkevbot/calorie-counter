@@ -1,7 +1,9 @@
 use chrono::prelude::*;
 use serde::{Deserialize, Serialize};
-use std::fs::{File, OpenOptions};
-use std::io::BufReader;
+use std::{
+    fs::{File, OpenOptions},
+    io::BufReader,
+};
 
 pub fn add_to_daily_log(entry: Entry) {
     let mut daily_log = get_daily_log();
@@ -17,19 +19,23 @@ pub fn view_daily_log() {
     )
 }
 
+pub fn total_calories_for_daily_log() -> u16 {
+    get_daily_log().total_calories()
+}
+
 fn get_daily_log() -> DailyLog {
-    let daily_log_file = daily_log_file();
+    let daily_log_file = open_daily_log_file();
     let reader = BufReader::new(daily_log_file);
     let daily_log: DailyLog = serde_json::from_reader(reader).unwrap_or(DailyLog::new());
     daily_log
 }
 
 fn overwrite_daily_log(daily_log: DailyLog) {
-    let daily_log_file = daily_log_file();
+    let daily_log_file = open_daily_log_file();
     serde_json::to_writer_pretty(&daily_log_file, &daily_log).unwrap();
 }
 
-fn daily_log_file() -> File {
+fn open_daily_log_file() -> File {
     OpenOptions::new()
         .create(true)
         .write(true)
@@ -57,6 +63,14 @@ impl DailyLog {
     pub fn push(&mut self, entry: Entry) {
         self.entries.push(entry);
     }
+
+    pub fn total_calories(&self) -> u16 {
+        let calories_values = self
+            .entries
+            .iter()
+            .fold(0, |total_calories, entry| total_calories + entry.calories);
+        calories_values
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -71,5 +85,22 @@ impl Entry {
             food_name,
             calories,
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn sum_of_calories_is_correct() {
+        let mut dl = DailyLog::new();
+        let e1 = Entry::new("Apples".to_string(), 100);
+        let e2 = Entry::new("Cake".to_string(), 450);
+
+        dl.push(e1);
+        dl.push(e2);
+
+        assert_eq!(dl.total_calories(), 550);
     }
 }
