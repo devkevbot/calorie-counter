@@ -12,13 +12,13 @@ pub fn add_to_daily_log(entry: Entry) {
     overwrite_daily_log(daily_log);
 }
 
-pub fn view_daily_log() {
+pub fn view_daily_log() -> String {
     let daily_log = get_daily_log();
-    let printed_str = match &daily_log.entries.len() {
+    let formatted_log = match &daily_log.entries.len() {
         0 => "No entries for today!".to_string(),
         _ => format!("{}", &daily_log),
     };
-    println!("{printed_str}")
+    formatted_log
 }
 
 pub fn total_calories_for_daily_log() -> u16 {

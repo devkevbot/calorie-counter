@@ -14,7 +14,7 @@ fn main() -> Result<()> {
             entry::add_to_daily_log(entry::Entry::new(name.to_string(), *quantity));
         }
         cli::Commands::View => {
-            entry::view_daily_log();
+            println!("Log for today\n{}", entry::view_daily_log());
         }
         cli::Commands::Total => {
             println!(
