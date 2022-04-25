@@ -1,6 +1,7 @@
 use chrono::prelude::*;
 use serde::{Deserialize, Serialize};
 use std::{
+    fmt::Display,
     fs::{File, OpenOptions},
     io::BufReader,
 };
@@ -13,10 +14,11 @@ pub fn add_to_daily_log(entry: Entry) {
 
 pub fn view_daily_log() {
     let daily_log = get_daily_log();
-    println!(
-        "{}",
-        serde_json::to_string_pretty(&daily_log.entries).unwrap()
-    )
+    let printed_str = match &daily_log.entries.len() {
+        0 => "No entries for today!".to_string(),
+        _ => format!("{}", &daily_log),
+    };
+    println!("{printed_str}")
 }
 
 pub fn total_calories_for_daily_log() -> u16 {
@@ -73,6 +75,21 @@ impl DailyLog {
     }
 }
 
+impl Display for DailyLog {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            &self
+                .entries
+                .iter()
+                .map(|entry| entry.to_string())
+                .collect::<Vec<String>>()
+                .join("\n")
+        )
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Entry {
     food_name: String,
@@ -85,6 +102,12 @@ impl Entry {
             food_name,
             calories,
         }
+    }
+}
+
+impl Display for Entry {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}: {} calories", self.food_name, self.calories)
     }
 }
 
