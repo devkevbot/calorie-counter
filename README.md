@@ -1,13 +1,22 @@
 # calorie-counter
 
-## Core features
-- Add new food entries to today's log
-- View entries in today's log
+## Commands
+### Add a new item to today's calorie log
+```bash
+$ calorie-counter add -f <FOOD_NAME> -c <CALORIES>
+```
+### View the entries in today's calorie log
+```bash
+$ calorie-counter view
+```
 
-## Stretch features
-- Delete an item from the log
-- View log for an arbitrary range of days
+### Print the total number of calories in today's calorie log
+```bash
+$ calorie-counter total
+```
+---
+
+## Roadmap & Stretch Goals
 - Edit an item in the log
-- Auto-create log each mroning
-- Auto-report previously log each morning
-- Trend analysis
+- Delete an item from a log
+- View logs for an arbitrary range of days
