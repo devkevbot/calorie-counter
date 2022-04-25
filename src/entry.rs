@@ -6,48 +6,83 @@ use std::{
     io::BufReader,
 };
 
-pub fn add_to_daily_log(entry: Entry) {
-    let mut daily_log = get_daily_log();
-    daily_log.push(entry);
-    overwrite_daily_log(daily_log);
+pub mod add {
+    use super::*;
+
+    pub fn execute(entry: Entry) -> String {
+        today::append_entry(entry);
+        format_output_messsage()
+    }
+
+    fn format_output_messsage() -> String {
+        String::from("Successfully added entry to today's log!")
+    }
 }
 
-pub fn view_daily_log() -> String {
-    let daily_log = get_daily_log();
-    let formatted_log = match &daily_log.entries.len() {
-        0 => "No entries for today!".to_string(),
-        _ => format!("{}", &daily_log),
-    };
-    formatted_log
+pub mod view {
+    use super::*;
+
+    pub fn execute() -> String {
+        let daily_log = today::read_as_log();
+        format_output_messsage(&daily_log)
+    }
+
+    fn format_output_messsage(daily_log: &DailyLog) -> String {
+        let formatted_message = match &daily_log.entries.len() {
+            0 => "No entries for today!".to_string(),
+            _ => format!("Today's log\n{}", &daily_log),
+        };
+        formatted_message
+    }
 }
 
-pub fn total_calories_for_daily_log() -> u16 {
-    get_daily_log().total_calories()
+pub mod total {
+    use super::*;
+
+    pub fn execute() -> String {
+        let daily_log = today::read_as_log();
+        format_output_messsage(&daily_log)
+    }
+
+    fn format_output_messsage(daily_log: &DailyLog) -> String {
+        let total_calories = daily_log.total_calories();
+        let formatted_message = match total_calories {
+            0 => "No calories recorded for today!".to_string(),
+            _ => format!("Today's caloric total: {}", total_calories),
+        };
+        formatted_message
+    }
 }
 
-fn get_daily_log() -> DailyLog {
-    let daily_log_file = open_daily_log_file();
-    let reader = BufReader::new(daily_log_file);
-    let daily_log: DailyLog = serde_json::from_reader(reader).unwrap_or(DailyLog::new());
-    daily_log
-}
+mod today {
+    use super::*;
 
-fn overwrite_daily_log(daily_log: DailyLog) {
-    let daily_log_file = open_daily_log_file();
-    serde_json::to_writer_pretty(&daily_log_file, &daily_log).unwrap();
-}
+    pub fn read_as_log() -> DailyLog {
+        let file = read_as_file();
+        let reader = BufReader::new(file);
+        let daily_log: DailyLog = serde_json::from_reader(reader).unwrap_or(DailyLog::new());
+        daily_log
+    }
 
-fn open_daily_log_file() -> File {
-    OpenOptions::new()
-        .create(true)
-        .write(true)
-        .read(true)
-        .open(path_to_daily_log_file())
-        .unwrap()
-}
+    fn read_as_file() -> File {
+        OpenOptions::new()
+            .create(true)
+            .write(true)
+            .read(true)
+            .open(get_path())
+            .unwrap()
+    }
 
-fn path_to_daily_log_file() -> String {
-    format!("{}.json", Local::now().format("%Y-%m-%d").to_string())
+    fn get_path() -> String {
+        format!("{}.json", Local::now().format("%Y-%m-%d").to_string())
+    }
+
+    pub fn append_entry(entry: Entry) {
+        let mut daily_log = read_as_log();
+        daily_log.append(entry);
+        let file = read_as_file();
+        serde_json::to_writer_pretty(&file, &daily_log).unwrap();
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -62,7 +97,7 @@ impl DailyLog {
         }
     }
 
-    pub fn push(&mut self, entry: Entry) {
+    pub fn append(&mut self, entry: Entry) {
         self.entries.push(entry);
     }
 
@@ -121,8 +156,8 @@ mod tests {
         let e1 = Entry::new("Apples".to_string(), 100);
         let e2 = Entry::new("Cake".to_string(), 450);
 
-        dl.push(e1);
-        dl.push(e2);
+        dl.append(e1);
+        dl.append(e2);
 
         assert_eq!(dl.total_calories(), 550);
     }

@@ -1,18 +1,40 @@
+use crate::entry;
 use clap::{Parser, Subcommand};
+
+pub fn run() {
+    let args = Cli::parse();
+    execute_command(&args);
+}
 
 #[derive(Parser)]
 #[clap(author, version, about, long_about = None)]
-pub struct Cli {
+struct Cli {
     #[clap(subcommand)]
     pub command: Commands,
 }
 
-pub fn parse() -> Cli {
-    Cli::parse()
+fn execute_command(args: &Cli) {
+    match &args.command {
+        Commands::Add {
+            food_name: name,
+            calories: quantity,
+        } => {
+            println!(
+                "{}",
+                entry::add::execute(entry::Entry::new(name.to_string(), *quantity))
+            );
+        }
+        Commands::View => {
+            println!("{}", entry::view::execute());
+        }
+        Commands::Total => {
+            println!("{}", entry::total::execute())
+        }
+    };
 }
 
 #[derive(Subcommand)]
-pub enum Commands {
+enum Commands {
     /// Adds a new entry to the daily log
     Add {
         /// The name of the food
