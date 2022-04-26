@@ -58,13 +58,13 @@ mod today {
     use super::*;
 
     pub fn read_as_log() -> DailyLog {
-        let file = read_as_file();
+        let file = get_stored_file();
         let reader = BufReader::new(file);
         let daily_log: DailyLog = serde_json::from_reader(reader).unwrap_or(DailyLog::new());
         daily_log
     }
 
-    fn read_as_file() -> File {
+    fn get_stored_file() -> File {
         OpenOptions::new()
             .create(true)
             .write(true)
@@ -80,7 +80,7 @@ mod today {
     pub fn append_entry(entry: Entry) {
         let mut daily_log = read_as_log();
         daily_log.append(entry);
-        let file = read_as_file();
+        let file = get_stored_file();
         serde_json::to_writer_pretty(&file, &daily_log).unwrap();
     }
 }
