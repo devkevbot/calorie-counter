@@ -10,7 +10,7 @@ pub fn run() {
 #[clap(author, version, about, long_about = None)]
 struct Cli {
     #[clap(subcommand)]
-    pub command: Commands,
+    command: Commands,
 }
 
 fn execute_command(args: &Cli) {
