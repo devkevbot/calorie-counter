@@ -13,26 +13,6 @@ struct Cli {
     command: Commands,
 }
 
-fn execute_command(args: &Cli) {
-    match &args.command {
-        Commands::Add {
-            food_name: name,
-            calories: quantity,
-        } => {
-            println!(
-                "{}",
-                entry::add::execute(entry::Entry::new(name.to_string(), *quantity))
-            );
-        }
-        Commands::View => {
-            println!("{}", entry::view::execute());
-        }
-        Commands::Total => {
-            println!("{}", entry::total::execute())
-        }
-    };
-}
-
 #[derive(Subcommand)]
 enum Commands {
     /// Adds a new entry to the daily log
@@ -47,6 +27,19 @@ enum Commands {
     },
     /// View the contents of the daily log
     View,
-    /// Print the total calories recorded in the daily log
-    Total,
+}
+
+fn execute_command(args: &Cli) {
+    let mut ctx = entry::Context::new();
+
+    match &args.command {
+        Commands::Add {
+            food_name: name,
+            calories: quantity,
+        } => {
+            let entry = entry::Entry::new(name.to_string(), *quantity);
+            entry::add::execute(&mut ctx, entry)
+        }
+        Commands::View => entry::view::execute(ctx),
+    };
 }
